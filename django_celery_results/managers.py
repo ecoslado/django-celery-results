@@ -86,7 +86,8 @@ class TaskResultManager(models.Manager):
     @transaction_retry(max_retries=2)
     def store_result(self, content_type, content_encoding,
                      task_id, result, status,
-                     traceback=None, meta=None):
+                     traceback=None, meta=None,
+                     task_name=None, task_arguments=None):
         """Store the result and status of a task.
 
         Arguments:
@@ -107,6 +108,9 @@ class TaskResultManager(models.Manager):
                 transaction rollback on exception.  This could
                 happen in a race condition if another worker is trying to
                 create the same task.  The default is to retry twice.
+            task_name (str): Name of the celery task which generated the result.
+            task_arguments (str): JSON representation of the arguments passed
+                to the task.
         """
         fields = {
             'status': status,
@@ -115,6 +119,8 @@ class TaskResultManager(models.Manager):
             'meta': meta,
             'content_encoding': content_encoding,
             'content_type': content_type,
+            'task_name': task_name,
+            'task_arguments': task_arguments
         }
         obj, created = self.get_or_create(task_id=task_id, defaults=fields)
         if not created:

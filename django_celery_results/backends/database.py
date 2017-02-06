@@ -6,6 +6,7 @@ from celery.backends.base import BaseDictBackend
 
 from ..models import TaskResult
 
+import json
 
 class DatabaseBackend(BaseDictBackend):
     """The Django database backend, using models to store task state."""
@@ -27,6 +28,8 @@ class DatabaseBackend(BaseDictBackend):
             task_id, result, status,
             traceback=traceback,
             meta=meta,
+            task_name=str(request.task),
+            task_arguments=json.dumps(request.args)
         )
         return result
 
