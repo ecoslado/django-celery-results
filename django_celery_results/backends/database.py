@@ -23,13 +23,16 @@ class DatabaseBackend(BaseDictBackend):
             'children': self.current_task_children(request),
         })
 
+        task_arguments = None
+        if hasattr(request, 'args'):
+            task_arguments = json.dumps(request.args)
         self.TaskModel._default_manager.store_result(
             content_type, content_encoding,
             task_id, result, status,
             traceback=traceback,
             meta=meta,
             task_name=str(request.task),
-            task_arguments=json.dumps(request.args)
+            task_arguments=task_arguments
         )
         return result
 
